@@ -69,30 +69,29 @@ export default function Signup() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-white text-black flex flex-col">
       <Header />
 
-      <section className="pt-32 pb-20 md:pt-40 md:pb-32">
-        <div className="container-custom">
+      <section className="flex-1 flex items-center justify-center px-4 py-6">
+        <div className="w-full max-w-md">
           <motion.div
-            className="max-w-md mx-auto"
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="text-center mb-12">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight uppercase mb-4">
+            <div className="text-center mb-6 md:mb-8">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-2">
                 Sign Up
               </h1>
-              <p className="text-lg text-gray-600">
-                Create an account to submit your tracks
+              <p className="text-sm md:text-base text-gray-600">
+                Create an account to submit tracks
               </p>
             </div>
 
-            <div className="card-flowing">
+            <div className="bg-white border border-gray-100 rounded-xl p-6 md:p-8 shadow-md">
               {error && (
                 <motion.div
-                  className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 mb-6 rounded-lg shadow-sm"
+                  className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 mb-4 rounded-lg text-sm"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
@@ -101,9 +100,9 @@ export default function Signup() {
               )}
 
               {/* Email/Password Form */}
-              <form onSubmit={handleEmailSignup} className="space-y-4 mb-6">
+              <form onSubmit={handleEmailSignup} className="space-y-3 mb-4">
                 <div>
-                  <label htmlFor="displayName" className="block text-sm font-medium mb-2">
+                  <label htmlFor="displayName" className="block text-xs md:text-sm font-medium mb-1">
                     Full Name
                   </label>
                   <input
@@ -112,13 +111,13 @@ export default function Signup() {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     required
-                    className="input-field"
+                    className="w-full px-3 py-2.5 md:py-3 text-sm md:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent transition-all"
                     placeholder="John Doe"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">
+                  <label htmlFor="email" className="block text-xs md:text-sm font-medium mb-1">
                     Email
                   </label>
                   <input
@@ -127,13 +126,13 @@ export default function Signup() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="input-field"
+                    className="w-full px-3 py-2.5 md:py-3 text-sm md:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent transition-all"
                     placeholder="your.email@example.com"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium mb-2">
+                  <label htmlFor="password" className="block text-xs md:text-sm font-medium mb-1">
                     Password
                   </label>
                   <input
@@ -142,13 +141,13 @@ export default function Signup() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="input-field"
+                    className="w-full px-3 py-2.5 md:py-3 text-sm md:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent transition-all"
                     placeholder="••••••••"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+                  <label htmlFor="confirmPassword" className="block text-xs md:text-sm font-medium mb-1">
                     Confirm Password
                   </label>
                   <input
@@ -157,7 +156,7 @@ export default function Signup() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="input-field"
+                    className="w-full px-3 py-2.5 md:py-3 text-sm md:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent transition-all"
                     placeholder="••••••••"
                   />
                 </div>
@@ -165,19 +164,19 @@ export default function Signup() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-black text-white px-6 py-3 font-medium tracking-wide uppercase text-xs md:text-sm hover:bg-gray-800 active:bg-gray-900 transition-all rounded-lg shadow-md disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   {loading ? 'Creating Account...' : 'Sign Up'}
                 </button>
               </form>
 
               {/* Divider */}
-              <div className="relative my-6">
+              <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">OR</span>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-3 bg-white text-gray-500">OR</span>
                 </div>
               </div>
 
@@ -186,9 +185,9 @@ export default function Signup() {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full btn-google disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                className="w-full bg-white text-gray-700 px-6 py-3 font-medium text-xs md:text-sm hover:bg-gray-50 active:bg-gray-100 transition-all border border-gray-200 rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -198,8 +197,8 @@ export default function Signup() {
               </button>
 
               {/* Login Link */}
-              <div className="mt-8 text-center">
-                <p className="text-sm text-gray-600">
+              <div className="mt-6 text-center">
+                <p className="text-xs md:text-sm text-gray-600">
                   Already have an account?{' '}
                   <Link href="/login" className="font-medium text-black underline hover:no-underline">
                     Sign in here

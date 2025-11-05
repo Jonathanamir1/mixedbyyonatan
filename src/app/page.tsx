@@ -28,7 +28,7 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className='flex items-center justify-center bg-white px-5 py-8 min-h-[calc(100vh-4rem)] md:min-h-screen md:px-6 lg:px-8'>
+      <section className='flex items-center justify-center bg-white px-5 py-12 min-h-[calc(100vh-5rem)] md:min-h-screen md:px-6 lg:px-8'>
         <motion.div
           className='text-center max-w-6xl mx-auto w-full'
           variants={staggerContainer}

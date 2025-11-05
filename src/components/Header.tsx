@@ -25,9 +25,9 @@ export default function Header() {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="container-custom">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-20 md:h-20">
           {/* Logo */}
-          <Link href="/" className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold tracking-tight uppercase flex-shrink-0">
+          <Link href="/" className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight uppercase flex-shrink-0 py-2">
             <span className="hidden sm:inline">Mixed by Yonatan Amir</span>
             <span className="sm:hidden">YA Mixing</span>
           </Link>
@@ -61,13 +61,13 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Larger tap target */}
           <button
-            className="md:hidden p-2 -mr-2 touch-manipulation"
+            className="md:hidden p-3 -mr-2 touch-manipulation active:bg-gray-100 rounded-lg transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -80,18 +80,18 @@ export default function Header() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <motion.nav
-            className="md:hidden py-4 border-t border-gray-100"
+            className="md:hidden py-6 border-t border-gray-100"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="flex flex-col space-y-3">
+            <div className="flex flex-col space-y-4">
               {user ? (
                 <>
                   <Link
                     href="/dashboard"
-                    className="text-base font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-2"
+                    className="text-lg font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-3 active:bg-gray-50 rounded-lg px-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
@@ -101,13 +101,13 @@ export default function Header() {
                       handleLogout();
                       setIsMenuOpen(false);
                     }}
-                    className="text-base font-medium tracking-wide uppercase hover:opacity-60 transition-opacity text-left py-2"
+                    className="text-lg font-medium tracking-wide uppercase hover:opacity-60 transition-opacity text-left py-3 active:bg-gray-50 rounded-lg px-2"
                   >
                     Logout
                   </button>
                   <Link
                     href="/submit"
-                    className="btn-primary w-full text-center mt-2"
+                    className="btn-primary w-full text-center mt-2 text-base"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Submit Track
@@ -117,14 +117,14 @@ export default function Header() {
                 <>
                   <Link
                     href="/login"
-                    className="text-base font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-2"
+                    className="text-lg font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-3 active:bg-gray-50 rounded-lg px-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
                     href="/login"
-                    className="btn-primary w-full text-center mt-2"
+                    className="btn-primary w-full text-center mt-2 text-base"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Apply for Free Mix

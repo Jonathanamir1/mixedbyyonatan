@@ -12,25 +12,25 @@ export default function Footer() {
       viewport={{ once: true }}
     >
       <div className="container-custom">
-        <div className="flex flex-col md:flex-row items-center justify-between">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Copyright */}
-          <div className="text-sm tracking-wide mb-6 md:mb-0">
+          <div className="text-sm md:text-sm tracking-wide text-center md:text-left">
             © 2024 Mixed by Yonatan Amir. All rights reserved.
           </div>
 
           {/* Social Links */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center gap-8">
             <a
               href="https://www.instagram.com/jj.vst/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm tracking-wide uppercase hover:opacity-60 transition-opacity"
+              className="text-base md:text-sm tracking-wide uppercase hover:opacity-60 transition-opacity py-2 active:opacity-40"
             >
               Instagram
             </a>
             <a
               href="mailto:yonatanamir0@gmail.com"
-              className="text-sm tracking-wide uppercase hover:opacity-60 transition-opacity"
+              className="text-base md:text-sm tracking-wide uppercase hover:opacity-60 transition-opacity py-2 active:opacity-40"
             >
               Email
             </a>
