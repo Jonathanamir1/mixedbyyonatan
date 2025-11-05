@@ -176,9 +176,8 @@ function DashboardContent() {
       <div className="min-h-screen bg-white text-black flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-lg">Loading...</div>
+          <div className="text-base">Loading...</div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -186,57 +185,57 @@ function DashboardContent() {
   // View: User has already submitted
   if (hasSubmission) {
     return (
-      <div className="min-h-screen bg-white text-black">
+      <div className="min-h-screen bg-white text-black flex flex-col">
         <Header />
 
-        <main className="container-custom py-12 md:py-16">
-          <div className="max-w-3xl mx-auto">
+        <main className="flex-1 flex items-center justify-center px-4 py-6">
+          <div className="w-full max-w-2xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.4 }}
             >
-              <div className="mb-10">
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight uppercase mb-3">
+              <div className="mb-6 text-center">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-2">
                   Dashboard
                 </h1>
-                <p className="text-base md:text-lg text-gray-600">
+                <p className="text-sm md:text-base text-gray-600">
                   Welcome back, {user?.displayName || user?.email}
                 </p>
               </div>
 
               {/* Submission Status Card */}
-              <div className="card-flowing mb-8">
-                <div className="flex items-start justify-between mb-6">
+              <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-md mb-4">
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h2 className="text-2xl font-bold uppercase tracking-tight mb-2">
+                    <h2 className="text-xl font-bold uppercase tracking-tight mb-1">
                       Your Submission
                     </h2>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-600">
                       Track submitted successfully
                     </p>
                   </div>
-                  <span className="px-4 py-2 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-lg uppercase tracking-wide">
+                  <span className="px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-lg uppercase tracking-wide">
                     {submissionData?.status || 'Pending'}
                   </span>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Track Name</p>
-                    <p className="text-lg font-semibold mt-1">{submissionData?.trackName}</p>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Track Name</p>
+                    <p className="text-base font-semibold mt-0.5">{submissionData?.trackName}</p>
                   </div>
 
                   {submissionData?.message && (
                     <div>
-                      <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Message</p>
-                      <p className="text-base text-gray-700 mt-1">{submissionData.message}</p>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Message</p>
+                      <p className="text-sm text-gray-700 mt-0.5">{submissionData.message}</p>
                     </div>
                   )}
 
                   <div>
-                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Submitted</p>
-                    <p className="text-base text-gray-700 mt-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Submitted</p>
+                    <p className="text-sm text-gray-700 mt-0.5">
                       {submissionData?.createdAt?.toDate?.()?.toLocaleDateString() || 'Recently'}
                     </p>
                   </div>
@@ -244,57 +243,55 @@ function DashboardContent() {
               </div>
 
               {/* Info Card */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                <h3 className="font-bold text-lg mb-3">What happens next?</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <h3 className="font-bold text-sm mb-2">What happens next?</h3>
+                <ul className="space-y-1.5 text-xs text-gray-700">
                   <li className="flex items-start">
                     <span className="text-blue-600 mr-2 mt-0.5">•</span>
                     <span>We&apos;ll review your submission carefully</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-blue-600 mr-2 mt-0.5">•</span>
-                    <span>If selected, we&apos;ll reach out via email to schedule a call</span>
+                    <span>If selected, we&apos;ll reach out via email</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-blue-600 mr-2 mt-0.5">•</span>
-                    <span>Check back here for updates on your submission status</span>
+                    <span>Check back here for status updates</span>
                   </li>
                 </ul>
               </div>
             </motion.div>
           </div>
         </main>
-
-        <Footer />
       </div>
     );
   }
 
   // View: User hasn't submitted yet - Show submission form
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-white text-black flex flex-col">
       <Header />
 
-      <main className="container-custom py-12 md:py-16">
+      <main className="flex-1 flex items-center justify-center px-4 py-6">
         <motion.div
-          className="max-w-2xl mx-auto"
-          initial={{ opacity: 0, y: 60 }}
+          className="w-full max-w-2xl"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.4 }}
         >
-          <div className="text-center mb-8 md:mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight uppercase mb-3">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-2">
               Apply for a Free Mix
             </h1>
-            <p className="text-base md:text-lg text-gray-600">
+            <p className="text-sm md:text-base text-gray-600">
               Share your music with us for consideration
             </p>
           </div>
 
-          <div className="card-flowing">
+          <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-md">
             {error && (
               <motion.div
-                className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 mb-6 rounded-lg text-sm"
+                className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 mb-4 rounded-lg text-xs"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
@@ -302,9 +299,9 @@ function DashboardContent() {
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="trackName" className="block text-xs md:text-sm font-medium uppercase tracking-wide mb-2">
+                <label htmlFor="trackName" className="block text-xs font-medium uppercase tracking-wide mb-1.5">
                   Track Name *
                 </label>
                 <input
@@ -312,37 +309,37 @@ function DashboardContent() {
                   id="trackName"
                   value={trackName}
                   onChange={(e) => setTrackName(e.target.value)}
-                  className="input-field"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-xs md:text-sm font-medium uppercase tracking-wide mb-2">
+                <label htmlFor="message" className="block text-xs font-medium uppercase tracking-wide mb-1.5">
                   Message
                 </label>
                 <textarea
                   id="message"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  rows={4}
-                  className="input-field resize-none"
-                  placeholder="Tell us about your track, your vision, or any specific requests..."
+                  rows={3}
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all resize-none"
+                  placeholder="Tell us about your track..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs md:text-sm font-medium uppercase tracking-wide mb-3">
+                <label className="block text-xs font-medium uppercase tracking-wide mb-2">
                   Upload Method *
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setUploadMethod('file')}
-                    className={`px-4 py-3 rounded-lg border-2 font-medium text-sm transition-all ${
+                    className={`px-3 py-2.5 rounded-lg border-2 font-medium text-xs transition-all ${
                       uploadMethod === 'file'
                         ? 'border-black bg-black text-white'
-                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 active:bg-gray-50'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                     }`}
                   >
                     Upload File
@@ -350,30 +347,20 @@ function DashboardContent() {
                   <button
                     type="button"
                     onClick={() => setUploadMethod('url')}
-                    className={`px-4 py-3 rounded-lg border-2 font-medium text-sm transition-all ${
+                    className={`px-3 py-2.5 rounded-lg border-2 font-medium text-xs transition-all ${
                       uploadMethod === 'url'
                         ? 'border-black bg-black text-white'
-                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 active:bg-gray-50'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                     }`}
                   >
                     Provide URL
                   </button>
                 </div>
-                {uploadMethod === 'url' ? (
-                  <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs">
-                    <p className="font-medium mb-1">For URL submissions:</p>
-                    <p className="text-gray-700">Please share your track privately with <strong>yonatanamir0@gmail.com</strong></p>
-                  </div>
-                ) : (
-                  <p className="text-xs text-gray-500 mt-2">
-                    Upload your audio file directly (MP3, WAV, etc.)
-                  </p>
-                )}
               </div>
 
               {uploadMethod === 'file' && (
                 <div>
-                  <label htmlFor="file" className="block text-xs md:text-sm font-medium uppercase tracking-wide mb-2">
+                  <label htmlFor="file" className="block text-xs font-medium uppercase tracking-wide mb-1.5">
                     Audio File *
                   </label>
                   <input
@@ -381,12 +368,11 @@ function DashboardContent() {
                     id="file"
                     onChange={handleFileChange}
                     accept="audio/*"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+                    className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700"
                     required={uploadMethod === 'file'}
                   />
-                  <p className="text-xs text-gray-600 mt-2">Max file size: 50MB</p>
                   {file && (
-                    <p className="text-sm mt-2 font-medium">
+                    <p className="text-xs mt-1.5 font-medium text-gray-700">
                       {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                     </p>
                   )}
@@ -395,7 +381,7 @@ function DashboardContent() {
 
               {uploadMethod === 'url' && (
                 <div>
-                  <label htmlFor="trackURL" className="block text-xs md:text-sm font-medium uppercase tracking-wide mb-2">
+                  <label htmlFor="trackURL" className="block text-xs font-medium uppercase tracking-wide mb-1.5">
                     Track URL *
                   </label>
                   <input
@@ -403,27 +389,26 @@ function DashboardContent() {
                     id="trackURL"
                     value={trackURL}
                     onChange={(e) => setTrackURL(e.target.value)}
-                    className="input-field"
-                    placeholder="https://drive.google.com/... or https://dropbox.com/..."
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
+                    placeholder="https://drive.google.com/..."
                     required={uploadMethod === 'url'}
                   />
-                  <p className="text-xs text-gray-600 mt-2">
-                    Provide a private link shared with <strong>yonatanamir0@gmail.com</strong>
+                  <p className="text-xs text-gray-600 mt-1.5">
+                    Share privately with <strong>yonatanamir0@gmail.com</strong>
                   </p>
                 </div>
               )}
 
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-xs text-gray-600">
-                <p className="font-medium text-gray-900 mb-2">Privacy & Rights Protection</p>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-600">
+                <p className="font-medium text-gray-900 mb-1">Privacy Notice</p>
                 <p>
-                  By submitting, you confirm you own all rights to this music. Your tracks are handled with complete confidentiality.
-                  We will <strong>never use, distribute, or claim ownership</strong> of your music.
+                  By submitting, you confirm you own all rights to this music. We will <strong>never use or distribute</strong> your work.
                 </p>
               </div>
 
               {uploading && uploadMethod === 'file' && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm font-medium">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-medium">
                     <span>Uploading...</span>
                     <span>{Math.round(uploadProgress)}%</span>
                   </div>
@@ -439,7 +424,7 @@ function DashboardContent() {
               <button
                 type="submit"
                 disabled={uploading || (uploadMethod === 'file' && !file) || (uploadMethod === 'url' && !trackURL.trim())}
-                className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-black text-white px-6 py-3 font-medium tracking-wide uppercase text-xs hover:bg-gray-800 transition-all rounded-lg shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {uploading ? (uploadMethod === 'file' ? 'Uploading...' : 'Submitting...') : 'Submit Track'}
               </button>
@@ -447,8 +432,6 @@ function DashboardContent() {
           </div>
         </motion.div>
       </main>
-
-      <Footer />
     </div>
   );
 }
