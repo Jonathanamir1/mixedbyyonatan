@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, browserLocalPersistence, setPersistence } from 'firebase/auth';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -20,5 +20,22 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Enable persistence for faster subsequent loads
+if (typeof window !== 'undefined') {
+  // Enable Auth persistence
+  setPersistence(auth, browserLocalPersistence).catch((error) => {
+    console.warn('Auth persistence error:', error);
+  });
+
+  // Enable Firestore offline persistence
+  enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.warn('Multiple tabs open, persistence enabled in first tab only');
+    } else if (err.code === 'unimplemented') {
+      console.warn('Browser does not support persistence');
+    }
+  });
+}
 
 export default app;

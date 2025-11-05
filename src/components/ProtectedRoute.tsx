@@ -16,8 +16,8 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-black to-blue-900">
-        <div className="text-white text-2xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-black text-base">Loading...</div>
       </div>
     );
   }

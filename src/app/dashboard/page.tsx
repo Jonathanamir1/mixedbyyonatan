@@ -33,7 +33,10 @@ function DashboardContent() {
   // Check for existing submission
   useEffect(() => {
     const checkSubmission = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const q = query(
@@ -46,9 +49,9 @@ function DashboardContent() {
           setHasSubmission(true);
           setSubmissionData(querySnapshot.docs[0].data());
         }
-        setLoading(false);
       } catch (error) {
         console.error('Error checking submission:', error);
+      } finally {
         setLoading(false);
       }
     };
