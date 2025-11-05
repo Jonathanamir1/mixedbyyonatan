@@ -45,7 +45,7 @@ export default function Header() {
                 >
                   Logout
                 </button>
-                <Link href="/submit" className="bg-black text-white px-6 py-2 font-medium tracking-wide uppercase text-sm hover:bg-gray-800 transition-all duration-300 rounded-lg shadow-md hover:shadow-lg">
+                <Link href="/dashboard" className="bg-black text-white px-6 py-2 font-medium tracking-wide uppercase text-sm hover:bg-gray-800 transition-all duration-300 rounded-lg shadow-md hover:shadow-lg">
                   Apply for Free Mix
                 </Link>
               </>
@@ -106,11 +106,11 @@ export default function Header() {
                     Logout
                   </button>
                   <Link
-                    href="/submit"
+                    href="/dashboard"
                     className="btn-primary w-full text-center mt-2 text-base"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Submit Track
+                    Apply for Free Mix
                   </Link>
                 </>
               ) : (

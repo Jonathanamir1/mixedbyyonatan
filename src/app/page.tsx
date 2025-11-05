@@ -51,7 +51,7 @@ export default function Home() {
 
           <motion.div variants={fadeInUp}>
             <Link
-              href={user ? '/submit' : '/login'}
+              href={user ? '/dashboard' : '/login'}
               className='btn-primary inline-block w-full sm:w-auto'
             >
               Apply for a Free Mix
@@ -235,7 +235,7 @@ export default function Home() {
               No cost. No contest. Just collaboration.
             </p>
             <Link
-              href={user ? '/submit' : '/login'}
+              href={user ? '/dashboard' : '/login'}
               className='btn-primary inline-block w-full sm:w-auto'
             >
               Apply for a Free Mix
