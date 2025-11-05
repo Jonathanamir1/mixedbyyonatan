@@ -89,7 +89,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              {/* Placeholder for Image */}
+              {/* Image */}
               <motion.div
                 className='w-full max-w-sm lg:w-1/3 lg:max-w-none flex-shrink-0'
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -97,8 +97,12 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <div className='aspect-square rounded-lg overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center'>
-                  <span className='text-gray-400 text-sm'>Your Image Here</span>
+                <div className='aspect-square rounded-lg overflow-hidden shadow-lg'>
+                  <img
+                    src='/bebito-image-01.png'
+                    alt='Yonatan Amir'
+                    className='w-full h-full object-cover'
+                  />
                 </div>
               </motion.div>
 
