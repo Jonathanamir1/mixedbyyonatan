@@ -13,26 +13,6 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const requiredConfigKeys = [
-  'apiKey',
-  'authDomain',
-  'projectId',
-  'storageBucket',
-  'messagingSenderId',
-  'appId',
-] as const;
-
-const missingConfigKeys = requiredConfigKeys.filter(
-  (key) => !firebaseConfig[key]
-);
-
-if (missingConfigKeys.length > 0) {
-  throw new Error(
-    `Missing Firebase env vars: ${missingConfigKeys.join(', ')}. ` +
-      'Create a .env.local file before running the app.'
-  );
-}
-
 // Initialize Firebase (singleton pattern)
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
