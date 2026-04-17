@@ -50,6 +50,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    const syncSession = async () => {
+      try {
+        if (user) {
+          const token = await user.getIdToken();
+          await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        } else {
+          await fetch('/api/auth/session', {
+            method: 'DELETE',
+          });
+        }
+      } catch (error) {
+        console.error('Session sync error:', error);
+      }
+    };
+
+    syncSession();
+  }, [user, loading]);
+
   const signup = async (email: string, password: string, displayName?: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     if (displayName && userCredential.user) {
@@ -63,6 +91,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     await signOut(auth);
+    try {
+      await fetch('/api/auth/session', {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Session delete error:', error);
+    }
   };
 
   const loginWithGoogle = async () => {

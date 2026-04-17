@@ -4,9 +4,15 @@ import { adminFirestore } from '@/lib/firebase-admin';
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
+  const state = request.nextUrl.searchParams.get('state');
+  const stateCookie = request.cookies.get('google_calendar_oauth_state')?.value;
 
   if (!code) {
     return NextResponse.redirect(new URL('/admin?google=missing_code', request.url));
+  }
+
+  if (!state || !stateCookie || state !== stateCookie) {
+    return NextResponse.redirect(new URL('/admin?google=state_mismatch', request.url));
   }
 
   try {
@@ -25,7 +31,14 @@ export async function GET(request: NextRequest) {
       { merge: true }
     );
 
-    return NextResponse.redirect(new URL('/admin?google=connected', request.url));
+    const response = NextResponse.redirect(new URL('/admin?google=connected', request.url));
+    response.cookies.set({
+      name: 'google_calendar_oauth_state',
+      value: '',
+      path: '/api/google/oauth/callback',
+      maxAge: 0,
+    });
+    return response;
   } catch (error) {
     console.error('Google OAuth callback error:', error);
     return NextResponse.redirect(new URL('/admin?google=error', request.url));
