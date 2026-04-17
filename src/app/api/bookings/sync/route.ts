@@ -16,6 +16,28 @@ function getAttendeeEmails(event: GoogleEvent) {
     .filter((email): email is string => Boolean(email));
 }
 
+function eventTextMatchesSubmission(event: GoogleEvent, submission: { userEmail?: string; userName?: string; trackName?: string }) {
+  const haystack = [
+    event.summary,
+    event.description,
+    event.location,
+    event.htmlLink,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  const tokens = [
+    submission.userEmail,
+    submission.userName,
+    submission.trackName,
+  ]
+    .map((value) => value?.toLowerCase())
+    .filter((value): value is string => Boolean(value));
+
+  return tokens.some((token) => haystack.includes(token));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const idToken = await getBearerToken(request);
@@ -40,13 +62,20 @@ export async function POST(request: NextRequest) {
 
     const submissionsSnap = await adminFirestore.collection('submissions').get();
     const submissionsByEmail = new Map<string, { id: string; data: FirebaseFirestore.DocumentData }>();
+    const submissionsById = new Map<string, { id: string; data: FirebaseFirestore.DocumentData }>();
     submissionsSnap.forEach((doc) => {
       const data = doc.data();
+      submissionsById.set(doc.id, { id: doc.id, data });
       const email = (data.userEmail || '').toLowerCase();
       if (email) {
         submissionsByEmail.set(email, { id: doc.id, data });
       }
     });
+
+    const currentUserSubmission =
+      submissionsById.get(decoded.uid) ||
+      (decoded.email ? submissionsByEmail.get(decoded.email.toLowerCase()) : null) ||
+      null;
 
     for (const event of events) {
       if (event.status === 'cancelled') {
@@ -55,7 +84,10 @@ export async function POST(request: NextRequest) {
 
       const attendeeEmails = getAttendeeEmails(event);
       const matchedSubmission =
-        attendeeEmails.map((email) => submissionsByEmail.get(email)).find(Boolean) || null;
+        attendeeEmails.map((email) => submissionsByEmail.get(email)).find(Boolean) ||
+        (currentUserSubmission && eventTextMatchesSubmission(event, currentUserSubmission.data)
+          ? currentUserSubmission
+          : null);
 
       if (!matchedSubmission) {
         continue;

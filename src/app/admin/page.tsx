@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminRoute from '@/components/AdminRoute';
 import Header from '@/components/Header';
+import { useSearchParams } from 'next/navigation';
 
 type SubmissionStatus = 'pending' | 'submitted' | 'accepted' | 'declined' | string;
 
@@ -56,10 +57,14 @@ function formatDate(value: any) {
 
 function AdminPageContent() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(true);
+  const [calendarConnected, setCalendarConnected] = useState(false);
+  const [calendarConnectedAt, setCalendarConnectedAt] = useState<string | null>(null);
+  const [calendarStatusLoading, setCalendarStatusLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -120,10 +125,62 @@ function AdminPageContent() {
     }
   };
 
+  const loadCalendarStatus = async () => {
+    setCalendarStatusLoading(true);
+
+    try {
+      if (!user) {
+        setCalendarConnected(false);
+        setCalendarConnectedAt(null);
+        return;
+      }
+
+      const token = await user.getIdToken();
+      const response = await fetch('/api/google/oauth/status', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        setCalendarConnected(false);
+        setCalendarConnectedAt(null);
+        return;
+      }
+
+      const payload = (await response.json()) as {
+        connected?: boolean;
+        connectedAt?: string | null;
+      };
+
+      setCalendarConnected(Boolean(payload.connected));
+      setCalendarConnectedAt(payload.connectedAt || null);
+    } catch (err) {
+      console.error('Error loading calendar status:', err);
+      setCalendarConnected(false);
+      setCalendarConnectedAt(null);
+    } finally {
+      setCalendarStatusLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadSubmissions();
     loadBookings();
+    loadCalendarStatus();
   }, [user]);
+
+  useEffect(() => {
+    const googleStatus = searchParams?.get('google');
+    if (googleStatus === 'connected') {
+      setInfo('Google Calendar connected successfully.');
+      loadCalendarStatus();
+    } else if (googleStatus === 'missing_refresh_token') {
+      setError('Google Calendar connection did not return a refresh token.');
+    } else if (googleStatus === 'missing_code' || googleStatus === 'error') {
+      setError('Google Calendar connection failed. Check the OAuth redirect URIs.');
+    }
+  }, [searchParams, user]);
 
   const counts = useMemo(() => {
     return submissions.reduce(
@@ -296,8 +353,24 @@ function AdminPageContent() {
           <div className="bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden mb-8">
             <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm md:text-base font-bold uppercase tracking-wide">Calendar Bookings</h2>
-                <p className="text-xs text-gray-500 mt-1">Synced from Google Calendar</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-sm md:text-base font-bold uppercase tracking-wide">Calendar Bookings</h2>
+                  <span
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium uppercase tracking-wide ${
+                      calendarStatusLoading
+                        ? 'bg-gray-100 text-gray-700'
+                        : calendarConnected
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                    }`}
+                  >
+                    {calendarStatusLoading ? 'Checking...' : calendarConnected ? 'Connected' : 'Not connected'}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Synced from Google Calendar
+                  {calendarConnectedAt ? ` • Connected ${new Date(calendarConnectedAt).toLocaleString()}` : ''}
+                </p>
               </div>
               <div className="flex items-center gap-3">
                 <button
@@ -441,7 +514,20 @@ function AdminPageContent() {
                             {submission.message && (
                               <p className="max-w-3xl"><span className="font-medium text-black">Message:</span> {submission.message}</p>
                             )}
-                            {submission.fileURL && (
+                            {submission.fileURL && submission.uploadMethod === 'url' && (
+                              <div className="space-y-1">
+                                <p className="font-medium text-black">Track URL:</p>
+                                <a
+                                  href={submission.fileURL}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="block break-all text-sm font-medium text-blue-700 underline underline-offset-4 hover:opacity-70 transition-opacity"
+                                >
+                                  {submission.fileURL}
+                                </a>
+                              </div>
+                            )}
+                            {submission.fileURL && submission.uploadMethod !== 'url' && (
                               <a
                                 href={submission.fileURL}
                                 target="_blank"

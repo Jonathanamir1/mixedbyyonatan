@@ -36,6 +36,13 @@ type BookingRecord = {
   bookingHtmlLink?: string;
 };
 
+type SubmissionRecord = {
+  userName?: string;
+  userEmail?: string;
+  trackName?: string;
+  message?: string;
+};
+
 const BOOKING_URL = 'https://calendar.app.google/MPZaZ13f2o7B7seN9';
 
 function formatDateTime(value?: string, timeZone?: string) {
@@ -48,6 +55,7 @@ function BookingContent() {
   const { user } = useAuth();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [booking, setBooking] = useState<BookingRecord | null>(null);
+  const [submission, setSubmission] = useState<SubmissionRecord | null>(null);
   const [syncing, setSyncing] = useState(false);
 
   const isBooked = booking?.status === 'booked';
@@ -96,10 +104,17 @@ function BookingContent() {
         const submissionSnap = await getDoc(doc(db, 'submissions', user.uid));
         if (!submissionSnap.exists()) {
           setBooking(null);
+          setSubmission(null);
           return;
         }
 
         const data = submissionSnap.data() as BookingRecord;
+        setSubmission({
+          userName: data.userName,
+          userEmail: data.userEmail,
+          trackName: data.trackName,
+          message: data.message,
+        });
         if (data.bookingStatus === 'booked') {
           setBooking({
             bookingId: data.bookingId,
@@ -178,6 +193,18 @@ function BookingContent() {
       until: formatDateTime(booking.end, booking.timeZone),
     };
   }, [booking]);
+
+  const bookingIdentity = useMemo(() => {
+    if (!submission) {
+      return null;
+    }
+
+    return {
+      name: submission.userName || user?.displayName || 'Your account',
+      email: submission.userEmail || user?.email || '',
+      trackName: submission.trackName || '',
+    };
+  }, [submission, user?.displayName, user?.email]);
 
   if (allowed === null) {
     return (
@@ -334,6 +361,23 @@ function BookingContent() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.05 }}
             >
+              {bookingIdentity && (
+                <div className="border-b border-gray-100 bg-gray-50 px-3 py-2 text-[11px] md:text-xs text-gray-600">
+                  Booking as <span className="font-semibold text-black">{bookingIdentity.name}</span>
+                  {bookingIdentity.email ? (
+                    <>
+                      {' '}
+                      <span className="text-gray-400">•</span> {bookingIdentity.email}
+                    </>
+                  ) : null}
+                  {bookingIdentity.trackName ? (
+                    <>
+                      {' '}
+                      <span className="text-gray-400">•</span> {bookingIdentity.trackName}
+                    </>
+                  ) : null}
+                </div>
+              )}
               <iframe
                 src={BOOKING_URL}
                 title="Google Calendar appointment scheduling"
