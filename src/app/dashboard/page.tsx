@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -25,7 +26,7 @@ function DashboardContent() {
   const [error, setError] = useState('');
 
   // Submission status states
-  const [submissionStatus, setSubmissionStatus] = useState<'none' | 'pending' | 'submitted'>('none');
+  const [submissionStatus, setSubmissionStatus] = useState<'none' | 'pending' | 'submitted' | 'accepted' | 'declined'>('none');
   const [submissionData, setSubmissionData] = useState<any>(null);
   const [checkingSubmission, setCheckingSubmission] = useState(true);
 
@@ -43,7 +44,12 @@ function DashboardContent() {
 
         if (submissionSnap.exists()) {
           const data = submissionSnap.data();
-          const status = data.status === 'pending' ? 'pending' : 'submitted';
+          const status =
+            data.bookingStatus === 'booked'
+              ? 'submitted'
+              : data.status === 'pending' || data.status === 'accepted' || data.status === 'declined'
+                ? data.status
+                : 'submitted';
           setSubmissionStatus(status);
           setSubmissionData(data);
         }
@@ -86,7 +92,13 @@ function DashboardContent() {
       const existingSubmission = await getDoc(doc(db, 'submissions', user.uid));
       if (existingSubmission.exists()) {
         const data = existingSubmission.data();
-        setSubmissionStatus(data.status === 'pending' ? 'pending' : 'submitted');
+        setSubmissionStatus(
+          data.bookingStatus === 'booked'
+            ? 'submitted'
+            : data.status === 'pending' || data.status === 'accepted' || data.status === 'declined'
+              ? data.status
+              : 'submitted'
+        );
         setSubmissionData(data);
         setError('You already have a submission on file.');
         return;
@@ -166,7 +178,8 @@ function DashboardContent() {
                 fileSize: file.size,
                 uploadMethod: 'file',
                 createdAt: serverTimestamp(),
-                status: 'submitted'
+                status: 'submitted',
+                bookingStatus: 'none'
               });
 
               setSubmissionStatus('submitted');
@@ -186,19 +199,20 @@ function DashboardContent() {
           }
         );
       } else if (uploadMethod === 'url') {
-        await setDoc(doc(db, 'submissions', user.uid), {
-          userId: user.uid,
-          userEmail: user.email,
-          userName: user.displayName || 'Unknown',
-          trackName,
+              await setDoc(doc(db, 'submissions', user.uid), {
+                userId: user.uid,
+                userEmail: user.email,
+                userName: user.displayName || 'Unknown',
+                trackName,
           message,
           fileURL: trackURL,
           fileName: 'External URL',
-          fileSize: 0,
-          uploadMethod: 'url',
-          createdAt: serverTimestamp(),
-          status: 'submitted'
-        });
+                fileSize: 0,
+                uploadMethod: 'url',
+                createdAt: serverTimestamp(),
+                status: 'submitted',
+                bookingStatus: 'none'
+              });
 
         setSubmissionStatus('submitted');
         setSubmissionData({
@@ -219,9 +233,12 @@ function DashboardContent() {
 
   const isPendingSubmission = submissionStatus === 'pending';
   const isSubmitted = submissionStatus === 'submitted';
+  const isAccepted = submissionStatus === 'accepted';
+  const isDeclined = submissionStatus === 'declined';
+  const isCheckingOnly = checkingSubmission && submissionStatus === 'none';
 
   // View: User has already submitted
-  if (isSubmitted || isPendingSubmission) {
+  if (isSubmitted || isPendingSubmission || isAccepted || isDeclined) {
     return (
       <div className="min-h-screen bg-white text-black flex flex-col">
         <Header />
@@ -250,11 +267,25 @@ function DashboardContent() {
                       Your Submission
                     </h2>
                     <p className="text-xs text-gray-600">
-                      {isPendingSubmission ? 'Upload in progress' : 'Track submitted successfully'}
+                      {isPendingSubmission
+                        ? 'Upload in progress'
+                        : isAccepted
+                          ? 'Your submission was accepted'
+                          : isDeclined
+                            ? 'Your submission was declined'
+                            : 'Track submitted successfully'}
                     </p>
                   </div>
-                  <span className={`px-3 py-1.5 text-xs font-medium rounded-lg uppercase tracking-wide ${isPendingSubmission ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                    {isPendingSubmission ? 'Pending' : 'Submitted'}
+                  <span className={`px-3 py-1.5 text-xs font-medium rounded-lg uppercase tracking-wide ${
+                    isPendingSubmission
+                      ? 'bg-blue-100 text-blue-800'
+                      : isAccepted
+                        ? 'bg-green-100 text-green-800'
+                        : isDeclined
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {isPendingSubmission ? 'Pending' : isAccepted ? 'Accepted' : isDeclined ? 'Declined' : 'Submitted'}
                   </span>
                 </div>
 
@@ -294,11 +325,50 @@ function DashboardContent() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-blue-600 mr-2 mt-0.5">•</span>
-                    <span>{isPendingSubmission ? 'Please wait for the upload to finish before submitting again' : 'Check back here for status updates'}</span>
+                    <span>
+                      {isPendingSubmission
+                        ? 'Please wait for the upload to finish before submitting again'
+                        : isAccepted
+                          ? 'Your 1:1 booking page is ready.'
+                          : isDeclined
+                            ? 'This submission has already been reviewed.'
+                            : 'Check back here for status updates'}
+                    </span>
                   </li>
                 </ul>
               </div>
+
+              {isAccepted && (
+                <div className="mt-4 bg-white border border-green-200 rounded-xl p-4">
+                  <h3 className="font-bold text-sm mb-2">Book Your 1:1</h3>
+                  <p className="text-xs text-gray-600 mb-4">
+                    Your submission was approved. Use the booking page below to choose a time for our session.
+                  </p>
+                  <Link
+                    href="/book"
+                    className="inline-flex items-center justify-center w-full sm:w-auto bg-black text-white px-5 py-3 rounded-lg text-xs font-medium uppercase tracking-wide hover:bg-gray-800 transition-all"
+                  >
+                    Open Booking Page
+                  </Link>
+                </div>
+              )}
             </motion.div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (isCheckingOnly) {
+    return (
+      <div className="min-h-screen bg-white text-black flex flex-col">
+        <Header />
+
+        <main className="flex-1 flex items-center justify-center px-4 py-6">
+          <div className="w-full max-w-2xl">
+            <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-md text-center">
+              <p className="text-xs text-gray-500">Checking your submission status...</p>
+            </div>
           </div>
         </main>
       </div>
@@ -327,12 +397,6 @@ function DashboardContent() {
           </div>
 
           <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-md">
-            {checkingSubmission && (
-              <div className="mb-4 text-center text-xs text-gray-500">
-                Checking your submission status...
-              </div>
-            )}
-
             {error && (
               <motion.div
                 className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 mb-4 rounded-lg text-xs"

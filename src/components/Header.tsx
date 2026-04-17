@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -39,6 +39,11 @@ export default function Header() {
                 <Link href="/dashboard" className="text-sm font-medium tracking-wide uppercase hover:opacity-60 transition-opacity">
                   Dashboard
                 </Link>
+                {isAdmin && (
+                  <Link href="/admin" className="text-sm font-medium tracking-wide uppercase hover:opacity-60 transition-opacity">
+                    Admin
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="text-sm font-medium tracking-wide uppercase hover:opacity-60 transition-opacity"
@@ -96,6 +101,15 @@ export default function Header() {
                   >
                     Dashboard
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="text-lg font-medium tracking-wide uppercase hover:opacity-60 transition-opacity py-3 active:bg-gray-50 rounded-lg px-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Admin
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       handleLogout();
