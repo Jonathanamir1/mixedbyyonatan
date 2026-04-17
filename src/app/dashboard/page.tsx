@@ -101,6 +101,19 @@ function DashboardContent() {
         const storageRef = ref(storage, `submissions/${user.uid}/${Date.now()}_${file.name}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
+        await setDoc(doc(db, 'submissions', user.uid), {
+          userId: user.uid,
+          userEmail: user.email,
+          userName: user.displayName || 'Unknown',
+          trackName,
+          message,
+          fileName: file.name,
+          fileSize: file.size,
+          uploadMethod: 'file',
+          createdAt: serverTimestamp(),
+          status: 'pending'
+        });
+
         uploadTask.on(
           'state_changed',
           (snapshot) => {
@@ -127,7 +140,7 @@ function DashboardContent() {
                 fileSize: file.size,
                 uploadMethod: 'file',
                 createdAt: serverTimestamp(),
-                status: 'pending'
+                status: 'submitted'
               });
 
               setHasSubmission(true);
@@ -135,7 +148,7 @@ function DashboardContent() {
                 trackName,
                 message,
                 fileName: file.name,
-                status: 'pending',
+                status: 'submitted',
                 createdAt: new Date()
               });
               setUploading(false);
@@ -158,7 +171,7 @@ function DashboardContent() {
           fileSize: 0,
           uploadMethod: 'url',
           createdAt: serverTimestamp(),
-          status: 'pending'
+          status: 'submitted'
         });
 
         setHasSubmission(true);
@@ -166,7 +179,7 @@ function DashboardContent() {
           trackName,
           message,
           fileName: 'External URL',
-          status: 'pending',
+          status: 'submitted',
           createdAt: new Date()
         });
         setUploading(false);
@@ -212,7 +225,7 @@ function DashboardContent() {
                     </p>
                   </div>
                   <span className="px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-lg uppercase tracking-wide">
-                    {submissionData?.status || 'Pending'}
+                    Submitted
                   </span>
                 </div>
 
