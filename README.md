@@ -16,6 +16,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Firebase Setup
+
+This app expects a local `.env.local` file with Firebase web config values.
+
+1. Copy `.env.local.example` to `.env.local`.
+2. In Firebase Console, enable Authentication providers you want to use:
+   - Email/Password
+   - Google
+3. Add `localhost` and any deployment domains you use to the Firebase Auth authorized domains list.
+4. If you deploy to Vercel later, add the Vercel preview and production domains there too.
+5. To publish the Storage and Firestore rules in this repo, run `firebase deploy --only firestore:rules,storage` from this folder after logging into Firebase CLI.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

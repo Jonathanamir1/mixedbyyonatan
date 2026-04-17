@@ -4,12 +4,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { collection, doc, setDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 function DashboardContent() {
   const { user } = useAuth();
@@ -28,13 +27,13 @@ function DashboardContent() {
   // Submission status states
   const [hasSubmission, setHasSubmission] = useState(false);
   const [submissionData, setSubmissionData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [checkingSubmission, setCheckingSubmission] = useState(true);
 
   // Check for existing submission
   useEffect(() => {
     const checkSubmission = async () => {
       if (!user) {
-        setLoading(false);
+        setCheckingSubmission(false);
         return;
       }
 
@@ -52,7 +51,7 @@ function DashboardContent() {
       } catch (error) {
         console.error('Error checking submission:', error);
       } finally {
-        setLoading(false);
+        setCheckingSubmission(false);
       }
     };
 
@@ -89,6 +88,11 @@ function DashboardContent() {
       return;
     }
 
+    if (uploadMethod === 'file' && typeof navigator !== 'undefined' && !navigator.onLine) {
+      setError('You are offline. Reconnect to upload a file.');
+      return;
+    }
+
     setUploading(true);
     setError('');
 
@@ -112,7 +116,7 @@ function DashboardContent() {
             try {
               const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
-              const docRef = await addDoc(collection(db, 'submissions'), {
+              await setDoc(doc(db, 'submissions', user.uid), {
                 userId: user.uid,
                 userEmail: user.email,
                 userName: user.displayName || 'Unknown',
@@ -143,7 +147,7 @@ function DashboardContent() {
           }
         );
       } else if (uploadMethod === 'url') {
-        await addDoc(collection(db, 'submissions'), {
+        await setDoc(doc(db, 'submissions', user.uid), {
           userId: user.uid,
           userEmail: user.email,
           userName: user.displayName || 'Unknown',
@@ -173,17 +177,6 @@ function DashboardContent() {
       setUploading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white text-black flex flex-col">
-        <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-base">Loading...</div>
-        </div>
-      </div>
-    );
-  }
 
   // View: User has already submitted
   if (hasSubmission) {
@@ -292,6 +285,12 @@ function DashboardContent() {
           </div>
 
           <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-md">
+            {checkingSubmission && (
+              <div className="mb-4 text-center text-xs text-gray-500">
+                Checking your submission status...
+              </div>
+            )}
+
             {error && (
               <motion.div
                 className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 mb-4 rounded-lg text-xs"

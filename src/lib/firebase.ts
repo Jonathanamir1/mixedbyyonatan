@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, browserLocalPersistence, setPersistence } from 'firebase/auth';
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -10,15 +10,40 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
+
+const requiredConfigKeys = [
+  'apiKey',
+  'authDomain',
+  'projectId',
+  'storageBucket',
+  'messagingSenderId',
+  'appId',
+] as const;
+
+const missingConfigKeys = requiredConfigKeys.filter(
+  (key) => !firebaseConfig[key]
+);
+
+if (missingConfigKeys.length > 0) {
+  throw new Error(
+    `Missing Firebase env vars: ${missingConfigKeys.join(', ')}. ` +
+      'Create a .env.local file before running the app.'
+  );
+}
 
 // Initialize Firebase (singleton pattern)
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Firebase services
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db =
+  typeof window !== 'undefined'
+    ? initializeFirestore(app, {
+        localCache: persistentLocalCache(),
+      })
+    : getFirestore(app);
 export const storage = getStorage(app);
 
 // Enable persistence for faster subsequent loads
@@ -28,14 +53,6 @@ if (typeof window !== 'undefined') {
     console.warn('Auth persistence error:', error);
   });
 
-  // Enable Firestore offline persistence
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === 'failed-precondition') {
-      console.warn('Multiple tabs open, persistence enabled in first tab only');
-    } else if (err.code === 'unimplemented') {
-      console.warn('Browser does not support persistence');
-    }
-  });
 }
 
 export default app;
