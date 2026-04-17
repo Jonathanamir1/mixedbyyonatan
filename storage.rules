@@ -2,7 +2,13 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /submissions/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && (
+          !firestore.exists(/databases/(default)/documents/submissions/$(userId))
+          || firestore.get(/databases/(default)/documents/submissions/$(userId)).data.status == 'pending'
+        );
     }
   }
 }

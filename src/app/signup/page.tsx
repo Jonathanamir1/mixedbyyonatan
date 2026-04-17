@@ -20,9 +20,13 @@ export default function Signup() {
   // Redirect to dashboard if user is already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/dashboard');
+      router.replace('/dashboard');
     }
   }, [user, authLoading, router]);
+
+  if (authLoading) {
+    return null;
+  }
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();

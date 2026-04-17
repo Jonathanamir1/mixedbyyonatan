@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { collection, doc, setDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -25,7 +25,7 @@ function DashboardContent() {
   const [error, setError] = useState('');
 
   // Submission status states
-  const [hasSubmission, setHasSubmission] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<'none' | 'pending' | 'submitted'>('none');
   const [submissionData, setSubmissionData] = useState<any>(null);
   const [checkingSubmission, setCheckingSubmission] = useState(true);
 
@@ -38,15 +38,14 @@ function DashboardContent() {
       }
 
       try {
-        const q = query(
-          collection(db, 'submissions'),
-          where('userId', '==', user.uid)
-        );
-        const querySnapshot = await getDocs(q);
+        const submissionRef = doc(db, 'submissions', user.uid);
+        const submissionSnap = await getDoc(submissionRef);
 
-        if (!querySnapshot.empty) {
-          setHasSubmission(true);
-          setSubmissionData(querySnapshot.docs[0].data());
+        if (submissionSnap.exists()) {
+          const data = submissionSnap.data();
+          const status = data.status === 'pending' ? 'pending' : 'submitted';
+          setSubmissionStatus(status);
+          setSubmissionData(data);
         }
       } catch (error) {
         console.error('Error checking submission:', error);
@@ -76,7 +75,25 @@ function DashboardContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || checkingSubmission) return;
+
+    if (submissionStatus !== 'none') {
+      setError('You already have a submission on file.');
+      return;
+    }
+
+    try {
+      const existingSubmission = await getDoc(doc(db, 'submissions', user.uid));
+      if (existingSubmission.exists()) {
+        const data = existingSubmission.data();
+        setSubmissionStatus(data.status === 'pending' ? 'pending' : 'submitted');
+        setSubmissionData(data);
+        setError('You already have a submission on file.');
+        return;
+      }
+    } catch (error) {
+      console.error('Error re-checking submission before submit:', error);
+    }
 
     if (uploadMethod === 'file' && !file) {
       setError('Please select a file to upload');
@@ -98,9 +115,6 @@ function DashboardContent() {
 
     try {
       if (uploadMethod === 'file' && file) {
-        const storageRef = ref(storage, `submissions/${user.uid}/${Date.now()}_${file.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
-
         await setDoc(doc(db, 'submissions', user.uid), {
           userId: user.uid,
           userEmail: user.email,
@@ -113,6 +127,18 @@ function DashboardContent() {
           createdAt: serverTimestamp(),
           status: 'pending'
         });
+
+        setSubmissionStatus('pending');
+        setSubmissionData({
+          trackName,
+          message,
+          fileName: file.name,
+          status: 'pending',
+          createdAt: new Date(),
+        });
+
+        const storageRef = ref(storage, `submissions/${user.uid}/${Date.now()}_${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
 
         uploadTask.on(
           'state_changed',
@@ -143,7 +169,7 @@ function DashboardContent() {
                 status: 'submitted'
               });
 
-              setHasSubmission(true);
+              setSubmissionStatus('submitted');
               setSubmissionData({
                 trackName,
                 message,
@@ -174,7 +200,7 @@ function DashboardContent() {
           status: 'submitted'
         });
 
-        setHasSubmission(true);
+        setSubmissionStatus('submitted');
         setSubmissionData({
           trackName,
           message,
@@ -191,8 +217,11 @@ function DashboardContent() {
     }
   };
 
+  const isPendingSubmission = submissionStatus === 'pending';
+  const isSubmitted = submissionStatus === 'submitted';
+
   // View: User has already submitted
-  if (hasSubmission) {
+  if (isSubmitted || isPendingSubmission) {
     return (
       <div className="min-h-screen bg-white text-black flex flex-col">
         <Header />
@@ -221,11 +250,11 @@ function DashboardContent() {
                       Your Submission
                     </h2>
                     <p className="text-xs text-gray-600">
-                      Track submitted successfully
+                      {isPendingSubmission ? 'Upload in progress' : 'Track submitted successfully'}
                     </p>
                   </div>
-                  <span className="px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-lg uppercase tracking-wide">
-                    Submitted
+                  <span className={`px-3 py-1.5 text-xs font-medium rounded-lg uppercase tracking-wide ${isPendingSubmission ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {isPendingSubmission ? 'Pending' : 'Submitted'}
                   </span>
                 </div>
 
@@ -265,7 +294,7 @@ function DashboardContent() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-blue-600 mr-2 mt-0.5">•</span>
-                    <span>Check back here for status updates</span>
+                    <span>{isPendingSubmission ? 'Please wait for the upload to finish before submitting again' : 'Check back here for status updates'}</span>
                   </li>
                 </ul>
               </div>
@@ -438,10 +467,22 @@ function DashboardContent() {
 
               <button
                 type="submit"
-                disabled={uploading || (uploadMethod === 'file' && !file) || (uploadMethod === 'url' && !trackURL.trim())}
+                disabled={
+                  checkingSubmission ||
+                  uploading ||
+                  submissionStatus !== 'none' ||
+                  (uploadMethod === 'file' && !file) ||
+                  (uploadMethod === 'url' && !trackURL.trim())
+                }
                 className="w-full bg-black text-white px-6 py-3 font-medium tracking-wide uppercase text-xs hover:bg-gray-800 transition-all rounded-lg shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {uploading ? (uploadMethod === 'file' ? 'Uploading...' : 'Submitting...') : 'Submit Track'}
+                {checkingSubmission
+                  ? 'Checking...'
+                  : uploading
+                    ? (uploadMethod === 'file' ? 'Uploading...' : 'Submitting...')
+                    : submissionStatus !== 'none'
+                      ? 'Submission Locked'
+                      : 'Submit Track'}
               </button>
             </form>
           </div>
