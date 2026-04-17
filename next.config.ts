@@ -29,6 +29,7 @@ function readFirebaseWebConfig() {
 const firebaseWebConfig = readFirebaseWebConfig();
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['192.168.0.48'],
   env: {
     ...(firebaseWebConfig?.apiKey ? { NEXT_PUBLIC_FIREBASE_API_KEY: firebaseWebConfig.apiKey } : {}),
     ...(firebaseWebConfig?.authDomain ? { NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: firebaseWebConfig.authDomain } : {}),

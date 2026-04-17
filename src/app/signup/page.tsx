@@ -44,7 +44,6 @@ export default function Signup() {
 
     try {
       await signup(email, password, displayName);
-      router.push('/dashboard');
     } catch (error: any) {
       console.error('Signup error:', error);
       if (error.code === 'auth/email-already-in-use') {
@@ -64,7 +63,6 @@ export default function Signup() {
 
     try {
       await loginWithGoogle();
-      router.push('/dashboard');
     } catch (error: any) {
       console.error('Google sign-in error:', error);
       setError(error.message || 'Failed to sign up with Google');

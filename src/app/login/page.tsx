@@ -4,9 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { getRedirectResult } from 'firebase/auth';
 import { useAuth } from '@/contexts/AuthContext';
-import { auth } from '@/lib/firebase';
 import Header from '@/components/Header';
 
 export default function Login() {
@@ -24,29 +22,6 @@ export default function Login() {
     }
   }, [user, authLoading, router]);
 
-  useEffect(() => {
-    let active = true;
-
-    getRedirectResult(auth).catch((error: any) => {
-      if (!active) return;
-      console.error('Google redirect sign-in error:', error);
-      if (error?.code === 'auth/unauthorized-domain') {
-        setError('This domain is not authorized for Google sign-in.');
-      } else if (error?.code === 'auth/redirect-cancelled-by-user') {
-        setError('Google sign-in was cancelled before it finished.');
-      } else if (error?.code === 'auth/redirect-operation-pending') {
-        setError('Google sign-in is still completing. Try again in a moment.');
-      } else if (error?.code) {
-        setError(`Error: ${error.code} - ${error.message || 'Google sign-in failed'}`);
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
   if (authLoading) {
     return null;
   }
@@ -58,7 +33,6 @@ export default function Login() {
 
     try {
       await login(email, password);
-      router.push('/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
       setError('Failed to sign in. Please check your credentials.');
@@ -74,7 +48,9 @@ export default function Login() {
       await loginWithGoogle();
     } catch (error: any) {
       console.error('Google sign-in error:', error);
-      if (error.code === 'auth/unauthorized-domain') {
+      if (String(error?.code || '').includes('invalid-credential')) {
+        setError('Google login is still using a stale client secret in Firebase. Re-save the Google provider in Firebase Auth with the current Google Cloud client secret.');
+      } else if (error.code === 'auth/unauthorized-domain') {
         setError('This domain is not authorized for OAuth operations.');
       } else if (error.code === 'auth/popup-closed-by-user') {
         setError('Google sign-in was closed before it finished. Try again.');

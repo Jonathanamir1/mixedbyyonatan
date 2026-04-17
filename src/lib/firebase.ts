@@ -1,5 +1,11 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, browserLocalPersistence, setPersistence } from 'firebase/auth';
+import {
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+  getAuth,
+  initializeAuth,
+  indexedDBLocalPersistence,
+} from 'firebase/auth';
 import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -17,7 +23,19 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Firebase services
-export const auth = getAuth(app);
+export const auth =
+  typeof window !== 'undefined'
+    ? (() => {
+        try {
+          return initializeAuth(app, {
+            persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+            popupRedirectResolver: browserPopupRedirectResolver,
+          });
+        } catch {
+          return getAuth(app);
+        }
+      })()
+    : getAuth(app);
 export const db =
   typeof window !== 'undefined'
     ? initializeFirestore(app, {
@@ -25,14 +43,5 @@ export const db =
       })
     : getFirestore(app);
 export const storage = getStorage(app);
-
-// Enable persistence for faster subsequent loads
-if (typeof window !== 'undefined') {
-  // Enable Auth persistence
-  setPersistence(auth, browserLocalPersistence).catch((error) => {
-    console.warn('Auth persistence error:', error);
-  });
-
-}
 
 export default app;
